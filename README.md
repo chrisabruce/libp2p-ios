@@ -16,21 +16,64 @@ TODO
 
 ### Installing
 
-A step by step series of examples that tell you how to get a development env running
 
-Say what the step will be
+Setup
+-----
 
-```
-TODO
-```
+1. Install the common build tools like C compiler and linker. On macOS, get
+    Xcode, and install the command line tools.
 
-And repeat
+    ```sh
+    xcode-select --install
+    ```
 
-```
-TODO
-```
+2. Download [rustup](https://www.rustup.rs/). We will use this to setup Rust for
+   cross-compiling.
 
-End with an example of getting some data out of the system or using it for a little demo
+    ```sh
+    curl https://sh.rustup.rs -sSf | sh
+    ```
+
+3. Download targets for iOS
+
+    ```sh
+    # iOS. Note: you need *all* five targets
+    rustup target add aarch64-apple-ios armv7-apple-ios armv7s-apple-ios x86_64-apple-ios i386-apple-ios
+
+4. Install cargo-lipo to generate the iOS universal library.
+
+    ```sh
+    cargo install cargo-lipo
+    ```
+
+
+Creating the library
+----------------------
+
+
+1. Build the library.
+
+    ```sh
+    # iOS
+    cargo lipo --release
+    ```
+
+2. Build the Xcode project. - TODO
+
+    ```sh
+    cd examples/ios
+    xcodebuild -configuration Release -scheme RustChat | xcpretty
+    cd ../..
+    ```
+
+    When you create an Xcode project yourself, note the following points:
+
+    * Add the C header `rust_chat.h` to allow using the Rust functions from C.
+    * Copy `target/universal/release/lib???.a` to the project. You may need
+      to modify `LIBRARY_SEARCH_PATHS` to include the folder of the `*.a` file.
+    * Note that `cargo-lipo` does not generate bitcode yet. You must set
+      `ENABLE_BITCODE` to `NO`. (See also <http://stackoverflow.com/a/38488617>)
+    * You need to link to `libresolv.tbd`.
 
 
 ## Contributing
@@ -48,3 +91,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+
+## Acknowledgments
+
+- [rust_ios_android](https://github.com/kennytm/rust-ios-android)
